@@ -117,7 +117,7 @@ Dengan menggunakan method `.isna().sum()` diperoleh bahwa pada dataset flight te
 
 Perhatikan, untuk nilai yang hilang (missing value) pada setiap fitur memiliki persentase yang rendah (dibawah 10%) sehingga melakukan drop missing value menjadi suatu pilihan dalam menangani kasus missing value tersebut. Akan tetapi, untuk fitur sum_yr_1 dan sum_yr_2 akan dilakukan imputasi dengan 0 dengan dasar bahwa untuk setiap nilai yang hilang pada fitur sum_yr_1 diikuti dengan sum_yr_2 yang memiliki nilai 0 dan begitupula sebaliknya.
 
-**THandling Date Features**
+**Handling Date Features**
 
 Pada dataset flight terdapat 4 fitur date, yaitu fpp_date, first_flight_date, last_flight_date, dan load_time dengan tipe data object. Oleh karena itu, dilakukan konversi ke datetime sehingga mempermudah nantinya dalam proses feature engineering. Sebelum itu, dikarenakan terdapat perbedaan format tanggal antara fitur last_flight_date dengan fitur lainnya yang menggunakan format %m/%d/%Y. Selain itu, format pada fitur last_flight_date tidak konsisten karena ada beberapa baris dengan format %m/%d/%Y dan beberapa baris lainnya dengan format %Y/%m/%d %H:%m:%s. Sebelum melakukan konversi tipe data dari objek menjadi datetime, perlu dilakukan manipulasi terlebih dahulu untuk memastikan formatnya menjadi konsisten dan sesuai.
 
