@@ -82,3 +82,43 @@ Dengan statistika deskriptif pada data non-numerik sebagai berikut:
 | last_flight_date     | 62988  | 731    | 3/31/2014   | 959       |
 
 ## Exploratory Data Analysis
+
+Berikut beberapa EDA yang dilakukan:
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/category1.jpg?raw=true" alt="category1_plot" width="800">
+
+Gambar 1. Category1 Features Plot 
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/category2.jpg?raw=true" alt="category2_plot" width="800">
+
+Gambar 2. Category2 Features Plot 
+
+<img src="https://github.com/mfathul21/airline-customer-value/assets/94775806/70429894-932f-4ddf-a0b4-d4b3fce5eee2" alt="numeric_plot" width="800">
+
+Gambar 3. Numerical Features Plot
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/corr_plot.jpg?raw=true" alt="corr_plot" width="800">
+
+Gambar 4. Correlation Plot
+
+## Data Preprocessing
+
+**Handlin Missing Value**
+
+Dengan menggunakan method `.isna().sum()` diperoleh bahwa pada dataset flight terdapat beberapa data yang hilang dengan rincian sebagai berikut:
+
+- work_city: 3.6% nilai kosong
+- work_province: 5.2% nilai kosong
+- age: 0.67% nilai kosong
+- sum_yr_1: 0.87% nilai kosong
+- sum_yr_2: 0.22% nilai kosong
+- gender: 0.005% nilai kosong
+- work_country: 0.04% nilai kosong
+
+Perhatikan, untuk nilai yang hilang (missing value) pada setiap fitur memiliki persentase yang rendah (dibawah 10%) sehingga melakukan drop missing value menjadi suatu pilihan dalam menangani kasus missing value tersebut. Akan tetapi, untuk fitur sum_yr_1 dan sum_yr_2 akan dilakukan imputasi dengan 0 dengan dasar bahwa untuk setiap nilai yang hilang pada fitur sum_yr_1 diikuti dengan sum_yr_2 yang memiliki nilai 0 dan begitupula sebaliknya.
+
+**THandling Date Features**
+
+Pada dataset flight terdapat 4 fitur date, yaitu fpp_date, first_flight_date, last_flight_date, dan load_time dengan tipe data object. Oleh karena itu, dilakukan konversi ke datetime sehingga mempermudah nantinya dalam proses feature engineering. Sebelum itu, dikarenakan terdapat perbedaan format tanggal antara fitur last_flight_date dengan fitur lainnya yang menggunakan format %m/%d/%Y. Selain itu, format pada fitur last_flight_date tidak konsisten karena ada beberapa baris dengan format %m/%d/%Y dan beberapa baris lainnya dengan format %Y/%m/%d %H:%m:%s. Sebelum melakukan konversi tipe data dari objek menjadi datetime, perlu dilakukan manipulasi terlebih dahulu untuk memastikan formatnya menjadi konsisten dan sesuai.
+
+## Feature Engineering
