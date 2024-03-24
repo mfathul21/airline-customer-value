@@ -122,3 +122,38 @@ Perhatikan, untuk nilai yang hilang (missing value) pada setiap fitur memiliki p
 Pada dataset flight terdapat 4 fitur date, yaitu fpp_date, first_flight_date, last_flight_date, dan load_time dengan tipe data object. Oleh karena itu, dilakukan konversi ke datetime sehingga mempermudah nantinya dalam proses feature engineering. Sebelum itu, dikarenakan terdapat perbedaan format tanggal antara fitur last_flight_date dengan fitur lainnya yang menggunakan format %m/%d/%Y. Selain itu, format pada fitur last_flight_date tidak konsisten karena ada beberapa baris dengan format %m/%d/%Y dan beberapa baris lainnya dengan format %Y/%m/%d %H:%m:%s. Sebelum melakukan konversi tipe data dari objek menjadi datetime, perlu dilakukan manipulasi terlebih dahulu untuk memastikan formatnya menjadi konsisten dan sesuai.
 
 ## Feature Engineering
+
+Dalam proses ini, dilakukan seleksi fitur yang akan digunakan untuk melakukan klasterisasi terhadap pelanggan. Salah satu pendekatan yang umum digunakan adalah RFM (Recency, Frequency, Monetary), di mana fitur-fitur ini merepresentasikan tiga dimensi utama dari metode RFM, yaitu:
+
+1. **Recency (R):** Mewakili seberapa baru pelanggan terakhir kali melakukan interaksi atau melakukan perjalanan udara dengan pesawat dari data yang diambil. Semakin kecil nilai recency, semakin baru interaksi tersebut. Contohnya adalah jumlah hari sejak pelanggan terakhir kali melakukan penerbangan.
+
+2. **Frequency (F):** Mewakili seberapa sering pelanggan melakukan interaksi atau transaksi dalam jangka waktu tertentu. Semakin tinggi nilai frequency, semakin sering pelanggan berinteraksi. Contohnya adalah total penerbangan pelanggan dalam periode waktu yang ditentukan.
+
+3. **Monetary (M):** Mewakili seberapa banyak uang yang dihabiskan oleh pelanggan dalam bisnis dalam jangka waktu tertentu. Semakin tinggi nilai monetary, semakin besar nilai transaksi yang dilakukan pelanggan. Contohnya adalah total nilai pembelian yang dilakukan pelanggan dalam periode waktu yang ditentukan.
+
+Berikut adalah penggunaan fitur RFM dalam proses feature engineering:
+
+```python
+import pandas as pd
+
+customers = pd.DataFrame()
+customers['recency'] = airline['load_time'] - airline['last_flight_date']
+customers['frequency'] = airline['flight_count']
+customers['monetary'] = airline['sum_yr_1'] + airline['sum_yr_2']
+```
+
+Dengan menggunakan fitur RFM, dapat dilakukan pengelompokkan pelanggan ke dalam segmen-segmen yang berbeda berdasarkan perilaku belanja mereka. Hal ini dapat membantu bisnis untuk lebih memahami pelanggan mereka, mengidentifikasi peluang-peluang pemasaran, serta merancang strategi pemasaran yang lebih tersegmentasi dan efektif.
+
+Berikut masing-masing distribusi dari fitur RFM:
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/rfm_plot.jpg?raw=true" alt="corr_plot" width="800">
+
+Gambar 5. Distribution of RFM Features
+
+Dari Gambar 5, terlihat bahwa distribusi dari fitur-fitur pelanggan seperti recency, frequency, dan monetary memiliki kecenderungan positive skew (condong ke kanan). Oleh karena itu, akan dilakukan transformasi untuk mengubah bentuk distribusi tersebut dengan menggunakan Box-Cox transformasi, sehingga diperoleh distribusi setelah dilakukan transformasi sebagai berikut:
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/bcox_rfm_plot.jpg?raw=true" alt="corr_plot" width="800">
+
+Gambar 6. Distribution of RFM Features Transform
+
+Berdasarkan Gambar 6 diperoleh setelah dilakukan transformasi menggunakan metode Box-Cox, distribusi dari ketiga fitur RFM tersebut menjadi lebih simetris dan mendekati distribusi normal.
