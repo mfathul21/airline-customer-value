@@ -121,22 +121,21 @@ Perhatikan, untuk nilai yang hilang (missing value) pada setiap fitur memiliki p
 
 Pada dataset flight terdapat 4 fitur date, yaitu fpp_date, first_flight_date, last_flight_date, dan load_time dengan tipe data object. Oleh karena itu, dilakukan konversi ke datetime sehingga mempermudah nantinya dalam proses feature engineering. Sebelum itu, dikarenakan terdapat perbedaan format tanggal antara fitur last_flight_date dengan fitur lainnya yang menggunakan format %m/%d/%Y. Selain itu, format pada fitur last_flight_date tidak konsisten karena ada beberapa baris dengan format %m/%d/%Y dan beberapa baris lainnya dengan format %Y/%m/%d %H:%m:%s. Sebelum melakukan konversi tipe data dari objek menjadi datetime, perlu dilakukan manipulasi terlebih dahulu untuk memastikan formatnya menjadi konsisten dan sesuai.
 
-## Feature Engineering
+**Feature Engineering**
 
 Dalam proses ini, dilakukan seleksi fitur yang akan digunakan untuk melakukan klasterisasi terhadap pelanggan. Salah satu pendekatan yang umum digunakan adalah RFM (Recency, Frequency, Monetary), di mana fitur-fitur ini merepresentasikan tiga dimensi utama dari metode RFM, yaitu:
 
-1. **Recency (R):** Mewakili seberapa baru pelanggan terakhir kali melakukan interaksi atau melakukan perjalanan udara dengan pesawat dari data yang diambil. Semakin kecil nilai recency, semakin baru interaksi tersebut. Contohnya adalah jumlah hari sejak pelanggan terakhir kali melakukan penerbangan.
+1. Recency (R): Mewakili seberapa baru pelanggan terakhir kali melakukan interaksi atau melakukan perjalanan udara dengan pesawat dari data yang diambil. Semakin kecil nilai recency, semakin baru interaksi tersebut. Contohnya adalah jumlah hari sejak pelanggan terakhir kali melakukan penerbangan.
 
-2. **Frequency (F):** Mewakili seberapa sering pelanggan melakukan interaksi atau transaksi dalam jangka waktu tertentu. Semakin tinggi nilai frequency, semakin sering pelanggan berinteraksi. Contohnya adalah total penerbangan pelanggan dalam periode waktu yang ditentukan.
+2. Frequency (F): Mewakili seberapa sering pelanggan melakukan interaksi atau transaksi dalam jangka waktu tertentu. Semakin tinggi nilai frequency, semakin sering pelanggan berinteraksi. Contohnya adalah total penerbangan pelanggan dalam periode waktu yang ditentukan.
 
-3. **Monetary (M):** Mewakili seberapa banyak uang yang dihabiskan oleh pelanggan dalam bisnis dalam jangka waktu tertentu. Semakin tinggi nilai monetary, semakin besar nilai transaksi yang dilakukan pelanggan. Contohnya adalah total nilai pembelian yang dilakukan pelanggan dalam periode waktu yang ditentukan.
+3. Monetary (M): Mewakili seberapa banyak uang yang dihabiskan oleh pelanggan dalam bisnis dalam jangka waktu tertentu. Semakin tinggi nilai monetary, semakin besar nilai transaksi yang dilakukan pelanggan. Contohnya adalah total nilai pembelian yang dilakukan pelanggan dalam periode waktu yang ditentukan.
 
 Berikut adalah penggunaan fitur RFM dalam proses feature engineering:
 
 ```python
-import pandas as pd
-
 customers = pd.DataFrame()
+
 customers['recency'] = airline['load_time'] - airline['last_flight_date']
 customers['frequency'] = airline['flight_count']
 customers['monetary'] = airline['sum_yr_1'] + airline['sum_yr_2']
@@ -157,3 +156,78 @@ Dari Gambar 5, terlihat bahwa distribusi dari fitur-fitur pelanggan seperti rece
 Gambar 6. Distribution of RFM Features Transform
 
 Berdasarkan Gambar 6 diperoleh setelah dilakukan transformasi menggunakan metode Box-Cox, distribusi dari ketiga fitur RFM tersebut menjadi lebih simetris dan mendekati distribusi normal.
+
+**Standarization**
+
+Setelah melakukan feature engineering dan mendapatkan fitur RFM, langkah selanjutnya adalah standarisasi data. Standarisasi adalah proses untuk mengubah skala atau rentang nilai dari fitur-fitur dalam dataset sehingga memiliki skala yang seragam atau mendekati distribusi normal. Hal ini penting karena beberapa algoritma machine learning seperti SVM, KNN, dan regresi bergantung pada skala fitur yang seragam. Metode standarisasi yang digunakan adalah StandardScaler dengan implemntasi sebagai berikut.
+
+```python
+scaler = StandardScaler()
+scaler.fit(customers_fix)
+customers_std = scaler.transform(customers_fix)
+```
+
+Dengan menggunakan StandardScaler, skala fitur RFM dapat diubah sehingga memiliki mean = 0 dan standar deviasi = 1. Hal ini membantu dalam mempersiapkan data untuk proses klasterisasi dengan algoritma seperti K-Means atau DBSCAN, serta memastikan bahwa seluruh fitur memiliki dampak yang seimbang terhadap hasil klasterisasi.
+
+Setelah melakukan standarisasi, data siap untuk digunakan dalam proses klasterisasi untuk mengelompokkan pelanggan ke dalam segmen-segmen yang lebih homogen berdasarkan perilaku belanja mereka. Langkah-langkah selanjutnya termasuk pemilihan jumlah klaster yang optimal, pelatihan model klasterisasi, dan interpretasi hasil klasterisasi untuk mengambil wawasan bisnis yang berguna.
+
+## Modelling
+
+Dengan menggunakan algoritma K-Means untuk proses klasterisasi pelanggan penerbangan dilakukan evaluasi dengan elbow method dalam menentukan k (jumlah klaster) yang optimal, berikut hasil evaluasi dengan elbow method:
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/elbow_plot.jpg?raw=true" alt="corr_plot" width="800">
+
+Gambar 7. Evaluation Plot of Elbow Method
+
+Berdasarkan gambar 7 diperoleh nilai k atau jumlah klaster yang optimal adalah 4 klaster. Oleh karena itu, dilakukan proses modelling dengan algoritma K-Means dengan 4 klaster sehingga diperoleh untuk nilai rata-rata masing-masing sebagai berikut:
+
+| Cluster | Recency (mean) | Frequency (mean) | Monetary (mean) | Count |
+|---------|----------------|------------------|-----------------|-------|
+| 0       | 185.20         | 10.27            | 9496.37         | 16613 |
+| 1       | 365.74         | 3.00             | 2472.48         | 17935 |
+| 2       | 42.32          | 5.18             | 4060.77         | 10840 |
+| 3       | 25.67          | 28.26            | 26922.81        | 16216 |
+
+Selain itu, berikut untuk visualiasi segmentasi pelanggan dengan algoritma K-Means dan 4 klaster
+
+<img src="https://github.com/mfathul21/airline-customer-value/blob/main/assets/segment_plot.jpg?raw=true" alt="corr_plot" width="800">
+
+Gambar 8. Segmentation of Customers
+
+Perhatikanlah, berdasarkan tabel nilai rata-rata masing-masing klaster dan Gambar 8 dapat diambil beberapa kesimpulan dan rekomendasi sebagai berikut:
+
+**Cluster 0**
+
+- Recency (Mean): 185 hari
+- Frequency (Mean): 10 kali
+- Monetary (Mean): $9496.37
+- Jumlah Observasi: 16613
+
+Rekomendasi: Klaster ini terdiri dari pelanggan yang telah menggunakan layanan pesawat baru-baru ini, sering melakukan perjalanan dengan pesawat, dan memiliki pengeluaran yang tinggi dalam layanan pesawat. Rekomendasi untuk klaster ini adalah menawarkan program loyalitas eksklusif, upgrade kelas penerbangan, diskon khusus, akses ke lounge bandara, atau pelayanan tambahan yang dapat meningkatkan pengalaman perjalanan mereka.
+
+**Cluster 1**
+
+- Recency (Mean): 365 hari
+- Frequency (Mean): 3 kali
+- Monetary (Mean): $2472.48
+- Jumlah Observasi: 17935
+
+Rekomendasi: Klaster ini terdiri dari pelanggan yang jarang menggunakan layanan pesawat dan memiliki pengeluaran yang rendah dalam layanan pesawat. Rekomendasi untuk klaster ini adalah mengidentifikasi penyebab rendahnya frekuensi perjalanan dan upaya untuk meningkatkan kesadaran atau menawarkan promosi khusus, diskon, atau pelayanan tambahan untuk mendorong mereka untuk melakukan perjalanan lebih sering.
+
+**Cluster 2**
+
+- Recency (Mean): 42 hari
+- Frequency (Mean): 5 kali
+- Monetary (Mean): $4060.77
+- Jumlah Observasi: 10840
+
+Rekomendasi: Klaster ini terdiri dari pelanggan yang baru-baru ini menggunakan layanan pesawat, melakukan perjalanan dengan pesawat dengan frekuensi yang sedang, dan memiliki pengeluaran yang cukup tinggi dalam layanan pesawat. Rekomendasi untuk klaster ini adalah menawarkan paket perjalanan atau promosi yang dapat meningkatkan frekuensi perjalanan mereka, program loyalitas dengan reward menarik, atau pelayanan tambahan yang sesuai dengan kebutuhan perjalanan mereka.
+
+**Cluster 3**
+
+- Recency (Mean): 25 hari
+- Frequency (Mean): 28 kali
+- Monetary (Mean): $26922.81
+- Jumlah Observasi: 16216
+
+Rekomendasi: Klaster ini terdiri dari pelanggan yang baru-baru ini menggunakan layanan pesawat, sering melakukan perjalanan dengan pesawat dengan frekuensi yang tinggi, dan memiliki pengeluaran yang sangat tinggi dalam layanan pesawat. Rekomendasi untuk klaster ini adalah memberikan perhatian khusus kepada pelanggan VIP, menawarkan layanan premium eksklusif, program loyalitas dengan reward premium, akses prioritas di bandara, atau layanan khusus untuk meningkatkan pengalaman perjalanan mereka.
